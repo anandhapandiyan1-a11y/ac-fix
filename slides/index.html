@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AC-Fix — Presentation Deck</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    /* ===== BASE ===== */
+    :root {
+      --primary: #0ea5e9;
+      --primary-dark: #0369a1;
+      --accent: #22d3ee;
+      --ink: #0f172a;
+      --ink2: #1e293b;
+      --muted: #64748b;
+      --card: #fff;
+      --border: #e2e8f0;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --violet: #8b5cf6;
+      --red: #ef4444;
+      --radius: 16px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; overflow: hidden; }
+    .slide {
+      width: 100vw; height: 100vh; padding: 64px 80px; box-sizing: border-box;
+      background: #fff; color: var(--ink); position: relative; overflow: hidden;
+      display: none; flex-direction: column;
+    }
+    .slide.active { display: flex; }
+    .slide::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+      background: linear-gradient(90deg, var(--primary), var(--accent)); z-index: 10;
+    }
+    .container-sl { flex: 1 1 auto; max-width: 1100px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; }
+    .footer-bar { position: absolute; bottom: 30px; right: 50px; font-size: 13px; color: var(--muted); z-index: 20; }
+    .footer-bar b { color: var(--primary-dark); }
+    .pagination { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 20; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; transition: all 0.3s; }
+    .dot.active { background: var(--primary); width: 24px; box-shadow: 0 0 0 4px rgba(14,165,233,0.2); }
+    .bg-accent { position: absolute; top: -100px; right: -100px; width: 280px; height: 280px; border-radius: 50%; background: linear-gradient(135deg, rgba(14,165,233,0.12), rgba(228,79,214,0.08)); z-index: 0; }
+    .bg-accent2 { position: absolute; bottom: -110px; left: -110px; width: 320px; height: 320px; border-radius: 50%; background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(14,165,233,0.08)); z-index: 0; }
+    h1 { font-size: 46px; line-height: 1.1; letter-spacing: -0.02em; position: relative; z-index: 5; }
+    h1 span { color: var(--primary-dark); }
+    h1 .accent { background: linear-gradient(90deg, var(--primary), var(--accent), var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    h2 { font-size: 34px; margin-bottom: 8px; position: relative; z-index: 5; }
+    h3 { font-size: 26px; margin-bottom: 10px; color: var(--ink2); }
+    .kicker { display: inline-flex; gap: 8px; align-items: center; background: rgba(94,23,232,0.12); border: 1px solid rgba(144, 56, 231, 0.3); padding: 6px 16px; border-radius: 999px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    p, li { font-size: 20px; line-height: 1.6; color: var(--ink2); }
+    .sub { font-size: 15px; color: var(--muted); }
+    ul { padding-left: 28px; }
+    li { margin: 8px 0; }
+    /* ===== GRID / LAYOUT ===== */
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .grid3alt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    /* ===== CARDS ===== */
+    .card { background: var(--card); border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: 0 4px 20px rgba(15,23,42,0.05); padding: 28px; transition: transform 0.2s, box-shadow 0.2s; position: relative; z-index: 5; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(15,23,42,0.08); }
+    .card-accent { border-top: 4px solid var(--primary); }
+    .card-accent2 { border-top: 4px solid var(--violet); }
+    .card-accent3 { border-top: 4px solid var(--green); }
+    .icon-box { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; font-size: 26px; margin-bottom: 16px; }
+    .stat-big { font-size: 38px; font-weight: 800; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .badge-primary { background: #e0f2fe; color: var(--primary-dark); }
+    .badge-green { background: #d1fae5; color: #065f46; }
+    /* ===== CHIP ===== */
+    .chip { display: inline-flex; gap: 6px; align-items: center; background: #f8fafc; border: 1px solid var(--border); color: var(--ink2); padding: 7px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600; }
+    /* ===== CODE ===== */
+    pre { background: #0f172a; border-radius: 12px; padding: 22px; overflow-x: auto; font-size: 15.5px; line-height: 1.5; }
+    code { font-family: "Fira Code", "Consolas", monospace; }
+    pre code { color: #cbd5e1; }
+    .code-line { display: block; }
+    /* ===== TIMELINE ===== */
+    .timeline-h { display: flex; gap: 8px; margin-top: 28px; }
+    .ts { flex: 1; text-align: center; position: relative; }
+    .ts-num { width: 42px; height: 42px; margin: 0 auto; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 15px; z-index: 6; position: relative; }
+    .ts:not(:last-child)::after { content: ""; position: absolute; top: 21px; left: 50%; right: -50%; height: 3px; background: var(--border); }
+    .ts.done .ts-num { background: var(--green); }
+    .ts-label { font-size: 13px; font-weight: 700; margin-top: 10px; color: var(--ink2); }
+    .ts-sub { font-size: 12px; color: var(--muted); }
+    /* ===== DEMO BOX ===== */
+    .demo-box { background: #0f172a; border-radius: 14px; padding: 20px; margin-top: 18px; border: 1px solid #1e293b; }
+    .demo-box .db-row { display: flex; align-items: center; gap: 14px; margin: 10px 0; }
+    .db-avatar { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--accent)); }
+    .db-text b { display: block; font-size: 13.5px; color: #f1f5f9; }
+    .db-text span { font-size: 11.5px; color: #94a3b8; }
+    /* ===== SCREENSHOT ===== */
+    .screenshot-frame { background: #1e293b; border-radius: 12px; padding: 8px; margin-top: 22px; box-shadow: 0 8px 30px rgba(15,23,42,0.3); }
+    .screenshot-frame .sf-bar { display: flex; gap: 8px; margin-bottom: 10px; }
+    .sf-dot { width: 12px; height: 12px; border-radius: 50%; background: #ef4444; }
+    .sf-dot2 { background: #f59e0b; }
+    .sf-dot3 { background: #10b981; }
+    .screenshot-frame img { width: 100%; border-radius: 8px; display: block; }
+    /* ===== CTA ===== */
+    .cta-btn { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: 12px; padding: 16px 34px; font-size: 18px; font-weight: 700; cursor: pointer; }
+    .team { display: flex; align-items: center; gap: 14px; background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-top: 26px; }
+    .team-img { width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, var(--violet), var(--primary)); display: grid; place-items: center; font-size: 26px; }
+    .team b { font-size: 17px; }
+    .team .sub { font-size: 13.5px; }
+    .big-num { font-size: 64px; font-weight: 900; line-height: 1; opacity: 0.12; }
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      h1 { font-size: 34px; } h2 { font-size: 26px; } h3 { font-size: 22px; }
+      .slide { padding: 36px 24px; } .grid2, .grid3, .grid3alt { grid-template-columns: 1fr; }
+      .container-sl { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== SLIDE 1: Title ===== -->
+  <section class="slide active">
+    <div class="bg-accent"></div>
+    <div class="bg-accent2"></div>
+    <div class="container-sl">
+      <span class="kicker">FALL INTO TECHVERSE · EduMentor AI</span>
+      <h1 style="margin-top: 26px;">
+        AC-Fix<br />
+        <span class="accent">Local AC Service & Mechanic Finder</span>
+      </h1>
+      <p class="sub" style="margin-top: 22; max-width: 620px;">
+        Bridging residential customers with verified local AC technicians through
+        transparent pricing, real-time reviews, and instant location-based dispatch.
+      </p>
+      <div class="team" style="margin-top: 40;">
+        <div class="team-img">👨‍💻</div>
+        <div>
+          <b>Team Head: T. Raja Kamala Kannan</b>
+          <div class="sub">Dual-User Ecosystem • Trust • Transparency • Accountability</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">Slide 1/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 2: Problem Statement ===== -->
+  <section class="slide">
+    <div class="bg-accent"></div>
+    <div class="container-sl">
+      <h2>The Problem ⚡</h2>
+      <p class="sub" style="margin-bottom: 30;">Identifying daily challenges in local appliance servicing.</p>
+      <div class="grid2">
+        <div class="card">
+          <div class="icon-box" style="background:#fef3c7">🛡️</div>
+          <h3>Lack of Trust & Verification</h3>
+          <p style="margin-top:12;">Finding reliable, skilled local AC mechanics without personal references is difficult.</p>
+        </div>
+        <div class="card card-accent3">
+          <div class="icon-box" style="background:#fef3c7">💰</div>
+          <h3>Opaque Pricing</h3>
+          <p style="margin-top:12;">Hidden charges & lack of standardized service rates leave customers vulnerable to overpricing.</p>
+        </div>
+        <div class="card">
+          <div class="icon-box" style="background:#dbeafe">📞</div>
+          <h3>Inefficient Booking</h3>
+          <p style="margin-top:12;">Phone calls lead to miscommunication, delayed arrivals, and zero status tracking.</p>
+        </div>
+        <div class="card card-accent">
+          <div class="icon-box" style="background:#ede9fe">⭐</div>
+          <h3>No Accountability</h3>
+          <p style="margin-top:12;">Absence of systematic ratings makes service quality unpredictable.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">Slide 2/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 3: Solution ===== -->
+  <section class="slide">
+    <div class="bg-accent2"></div>
+    <div class="container-sl">
+      <h2>Our Solution 🛠️</h2>
+      <p class="sub" style="margin-bottom: 18;">How AC-Fix revolutionizes local service delivery.</p>
+      <div class="grid2">
+        <div>
+          <div class="grid3alt" style="margin-bottom: 24;">
+            <div class="card">
+              <div class="icon-box" style="background:#dbeafe">🏠</div>
+              <h3>Customer Portal</h3>
+              <p>Browse & filter nearby verified mechanics; check authentic ratings, reviews & portfolios.</p>
+            </div>
+            <div class="card">
+              <div class="icon-box" style="background:#ede9fe">⚡</div>
+              <h3>Instant Booking</h3>
+              <p>One-click booking with auto-address sharing using live geolocation.</p>
+            </div>
+            <div class="card">
+              <div class="icon-box" style="background:#d1fae5">📍</div>
+              <h3>Mechanic Portal</h3>
+              <p>Instant push notifications for nearby bookings with map navigation.</p>
+            </div>
+          </div>
+          <div class="card card-accent3">
+            <div class="icon-box" style="background:#fef3c7">🔁</div>
+            <h3>Live Status Updates</h3>
+            <p>Real-time tracking: <b style="color:var(--primary)">Pending → Accepted → On the Way → Completed</b></p>
+            <p style="margin-top:14; color:var(--muted)">Rate & review after every service keeps the ecosystem honest.</p>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; justify-content:center;">
+          <div class="big-num">SOLUTION</div>
+          <div class="chip" style="margin: 0 auto 18px;">CUSTOMER · WORKER · DISPATCH · TRACK · COMPLETE</div>
+          <img src="https://images.unsplash.com/photo-1581090764228-5e0b1a0f0f9e?auto=format&fit=crop&w=500&h=400&fit=crop&q=40" alt="Service flow" style="width:100%;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.06);" />
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">Slide 3/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 4: Why AC Repair ===== -->
+  <section class="slide">
+    <div class="bg-accent" style="top:-120px; right:-120px;"></div>
+    <div class="container-sl">
+      <h2>Why AC Repair First? 🎯</h2>
+      <p class="sub" style="margin-bottom: 30;">A focused MVP while keeping the architecture reusable.</p>
+      <div class="grid3">
+        <div class="card card-accent" style="text-align:center;">
+          <div class="stat-big" style="color:var(--primary);">86°F+</div>
+          <p style="margin-top:10; color:var(--muted); font-size:14px;">Summer temps make AC repair an urgent, high-frequency local need.</p>
+        </div>
+        <div class="card card-accent3" style="text-align:center;">
+          <div class="stat-big" style="color:var(--green);">5★</div>
+          <p style="margin-top:10; color:var(--muted); font-size:14px;">Service quality is easy to track via customer ratings & feedback.</p>
+        </div>
+        <div class="card card-accent2" style="text-align:center;">
+          <div class="stat-big" style="color:var(--violet);">📱</div>
+          <p style="margin-top:10; color:var(--muted); font-size:14px;">Location-based dispatch is a practical, immediate use case for geolocation APIs.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top: 32;">
+        <h3>Architecture Reusability</h3>
+        <p style="margin-top:10;">The same core engine expands to <b>Electricians • Plumbers • Home Appliances</b>, turning AC-Fix into a general home-service marketplace. <span class="badge badge-primary" style="margin-left:8;">MVP FIRST • LOCAL FOCUS • EXPAND</span></p>
+      </div>
+    </div>
+    <div class="footer-bar">Slide 4/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 5: End-to-End User Flow ===== -->
+  <section class="slide">
+    <div class="bg-accent2" style="bottom:-110px; left:-110px;"></div>
+    <div class="container-sl">
+      <h2>End-to-End User Flow 🔄</h2>
+      <p class="sub" style="margin-bottom: 30;">The complete journey from booking to execution.</p>
+      <div class="timeline-h">
+        <div class="ts">
+          <div class="ts-num">1</div>
+          <div class="ts-label">ONBOARD</div>
+          <div class="ts-sub">Secure login • Customer / Mechanic role</div>
+        </div>
+        <div class="ts">
+          <div class="ts-num">2</div>
+          <div class="ts-label">LOCATE</div>
+          <div class="ts-sub">Live address detection • find nearby mechanics</div>
+        </div>
+        <div class="ts">
+          <div class="ts-num">3</div>
+          <div class="ts-label">BOOK</div>
+          <div class="ts-sub">Review ratings • select mechanic • confirm request</div>
+        </div>
+        <div class="ts">
+          <div class="ts-num">4</div>
+          <div class="ts-label">DISPATCH</div>
+          <div class="ts-sub">Booking + route dispatched to mechanic dashboard</div>
+        </div>
+        <div class="ts">
+          <div class="ts-num">5</div>
+          <div class="ts-label">REVIEW</div>
+          <div class="ts-sub">Digital feedback • rating submission</div>
+        </div>
+      </div>
+      <img src="https://images.unsplash.com/photo-1552667468-0303bbe92b80?auto=format&fit=crop&w=900&h=140&q=40&fit=crop" alt="User journey" style="width:100%;margin-top:24px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.05);" />
+    </div>
+    <div class="footer-bar">Slide 5/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 6: Tech Stack ===== -->
+  <section class="slide">
+    <div class="bg-accent"></div>
+    <div class="container-sl">
+      <h2>Technical Architecture ⚙️</h2>
+      <p class="sub" style="margin-bottom: 30;">Robust technologies powering the application.</p>
+      <div class="grid2">
+        <div>
+          <div class="grid3" style="margin-bottom: 24;">
+            <div class="card" style="text-align:center;">
+              <div class="icon-box" style="background:#dbeafe; margin:0 auto;">⚛️</div>
+              <b>React.js</b><div class="sub">Responsive cross-platform UI (Vite)</div>
+            </div>
+            <div class="card" style="text-align:center;">
+              <div class="icon-box" style="background:#ede9fee; margin:0 auto;">🐍</div>
+              <b>Python FastAPI</b><div class="sub">Fast async request handling</div>
+            </div>
+            <div class="card" style="text-align:center;">
+              <div class="icon-box" style="background:#fef3c7; margin:0 auto;">🗄️</div>
+              <b>SQLite</b><div class="sub">Secure user & booking logs</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="icon-box" style="background:#dbeafe;">📍</div>
+            <h3>Location & APIs</h3>
+            <p>OpenStreetMap + Nominatim reverse-geocoding + Leaflet live address routing.</p>
+            <p style="margin-top:12;"><b>Auth:</b> JWT tokens + bcrypt password hashing</p>
+          </div>
+          <pre style="margin-top: 20;"><code>&lt;-- Architecture: React SPA --&gt;
+&lt;-- FastAPI REST API (JWT) --&gt;
+&lt;-- SQLAlchemy ORM --&gt;
+&lt;-- SQLite --&gt;
+
+GET   /api/services          catalog + prices
+GET   /api/mechanics?lat,lng nearby search
+POST  /api/bookings          instant booking
+GET   /api/bookings/my       live status
+PATCH /api/bookings/:id/status dispatch flow</code></pre>
+        </div>
+        <div>
+          <div class="card">
+            <h3>Project Structure</h3>
+            <pre><code>acfix/
+├── backend/
+│   ├── app/
+│   │   ├── main.py        FastAPI
+│   │   ├── models.py      SQLAlchemy
+│   │   ├── schemas.py     Pydantic
+│   │   ├── auth.py        JWT/bcrypt
+│   │   ├── geo.py         Haversine
+│   │   └── routers/
+│   │       └─ auth, services,
+│   │          mechanics, bookings,
+│   │          reviews
+│   └── acfix.db
+├── frontend/
+│   ├── pages/
+│   │   ├─ Landing
+│   │   ├─ Discover (Map)
+│   │   ├─ Bookings
+│   │   └─ Mechanic Dashboard
+│   └── components/
+└── start.bat</code></pre>
+          </div>
+          <div class="card card-accent3" style="margin-top:18;">
+            <h3>Dual-User Ecosystem</h3>
+            <div class="grid2" style="grid-template-columns: 1fr; gap: 14px;">
+              <div class="team"><div class="team-img" style="background:linear-gradient(135deg,#0ea5e9,#0369a1)">🏠</div><div><b>Customer</b><div class="sub">Discover • Book • Track • Review</div></div></div>
+              <div class="team"><div class="team-img" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">🔧</div><div><b>Mechanic</b><div class="sub">Jobs • Navigate • Complete • Stats</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">Slide 6/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 7: Screenshots / Live Demo ===== -->
+  <section class="slide">
+    <div class="bg-accent" style="top:unset; bottom:-120px; left:-120px; width:300px; height:300px;"></div>
+    <div class="container-sl">
+      <h2>Live Demo 🖥️</h2>
+      <p class="sub" style="margin-bottom: 28;">How AC-Fix revolutionizes local service delivery.</p>
+      <div class="grid2" style="align-items:start; gap:28px;">
+        <div>
+          <div class="screenshot-frame">
+            <div class="sf-bar"><div class="sf-dot"></div><div class="sf-dot2"></div><div class="sf-dot3"></div></div>
+            <img id="demo-img" src="app-screenshot.svg" alt="AC-Fix app screenshot: mechanic discovery map + booking modal" />
+          </div>
+          <div class="demo-box">
+            <div class="db-row"><div class="db-avatar">🏠</div><div class="db-text"><b>Demo Customer</b><span>customer@demo.com · books a mechanic</span></div></div>
+            <div class="db-row"><div class="db-avatar" style="background:linear-gradient(135deg,var(--violet),var(--primary))">🔧</div><div class="db-text"><b>Demo Mechanic</b><span>mechanic@demo.com · accepts & completes job</span></div></div>
+            <div class="db-row" style="margin-top:0;"><div class="team-img" style="width:40;height:40">⭐⭐⭐⭐⭐</div><div class="db-text"><b>Password: demo1234</b><span>Both roles use the same login</span></div></div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; justify-content:center; gap: 22px;">
+          <div class="card">
+            <h3 style="display:flex; align-items:center; gap:10px;">📱 Discover + Map View</h3>
+            <p style="margin-top:12">Live geolocation detects address → lists verified mechanics within 20km sorted by distance → map markers with ratings.</p>
+          </div>
+          <div class="card card-accent">
+            <h3 style="display:flex; align-items:center; gap:10px;">💰 Transparent Pricing</h3>
+            <p style="margin-top:12">Service fee + visit charge shown upfront in the booking modal — <b>no hidden costs</b>.</p>
+          </div>
+          <div class="card card-accent3">
+            <h3 style="display:flex; align-items:center; gap:10px;">🔁 Live Status Tracking</h3>
+            <p style="margin-top:12">Auto-refreshing timeline: Pending → Accepted → On the Way → Completed, with 1-click map navigation for the mechanic.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">Slide 7/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 8: Hackathon Execution Plan ===== -->
+  <section class="slide">
+    <div class="bg-accent2"></div>
+    <div class="container-sl">
+      <h2>Hackathon Roadmap 🚀</h2>
+      <p class="sub" style="margin-bottom: 12;">Phase-wise development strategy.</p>
+      <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px 22px 6px;margin-top:22;">
+        <div class="timeline-h">
+          <div class="ts" style="position:relative;">
+            <div class="ts-num" style="background:linear-gradient(135deg,var(--primary),var(--accent));">P1</div>
+            <div class="ts-label">IDEATE</div>
+            <div class="ts-sub">User workflows + layout mockups (Figma)</div>
+          </div>
+          <div class="ts">
+            <div class="ts-num" style="background:linear-gradient(135deg,var(--violet),var(--primary));">P2</div>
+            <div class="ts-label">BUILD</div>
+            <div class="ts-sub">Python backend APIs + DB schema</div>
+          </div>
+          <div class="ts">
+            <div class="ts-num" style="background:linear-gradient(135deg,var(--green),var(--accent));">P3</div>
+            <div class="ts-label">INTEGRATE</div>
+            <div class="ts-sub">Location services + dual dashboards</div>
+          </div>
+          <div class="ts">
+            <div class="ts-num" style="background:linear-gradient(135deg,var(--amber),var(--red));">P4</div>
+            <div class="ts-label">TEST</div>
+            <div class="ts-sub">Debug + 3-min jury pitch</div>
+          </div>
+        </div>
+      </div>
+      <div class="big-num" style="position:absolute; bottom:40px; right:60px; font-size:80px; opacity:0.05;">MVP</div>
+    </div>
+    <div class="footer-bar">Slide 8/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 9: API Endpoints ===== -->
+  <section class="slide">
+    <div class="bg-accent" style="top:-80px; right:-80px;"></div>
+    <div class="container-sl">
+      <h2>API Endpoints 📡</h2>
+      <p class="sub" style="margin-bottom: 26;">Full-stack communication layer (FastAPI — <a href="http://127.0.0.1:8000/docs" target="_blank" style="color:var(--primary);font-weight:700">interactive docs at /docs</a>).</p>
+      <div class="grid2">
+        <div>
+          <pre><code style="font-size:14px;"><span style="color:#a78bfa">POST</span>   /api/auth/register      Create customer or mechanic
+<span style="color:#a78bfa">POST</span>   /api/auth/login         Issue JWT token
+<span style="color:#38bdfa">GET</span>     /api/auth/me            Current user profile
+<span style="color:#38bdfa">GET</span>     /api/services           Service catalog + prices
+<span style="color:#38bdfa">GET</span>     /api/mechanics?lat,lng  Nearby mechanics (distance)
+<span style="color:#38bdfa">GET</span>     /api/mechanics/{id}     Mechanic detail + reviews
+<span style="color:#a78bfa">POST</span>    /api/bookings           Create booking
+<span style="color:#38bdfa">GET</span>     /api/bookings/my        My bookings (role-based)
+<span style="color:#db7706">PATCH</span>   /api/bookings/{id}/status  Status transitions
+<span style="color:#38bdfa">GET</span>     /api/bookings/stats     Dashboard stats
+<span style="color:#a78bfa">POST</span>    /api/reviews?booking_id Rating + comment</code></pre>
+        </div>
+        <div>
+          <div class="card" style="text-align:center; padding:32px 22px;">
+            <div class="stat-big" style="color:var(--green); font-size:50px;">200+</div>
+            <p style="margin-top:8; color:var(--muted); font-size:14px;">Rapid iteration cycles — from code change to live<br/>demo in seconds.</p>
+          </div>
+          <pre style="margin-top:18;"><code style="font-size:13px; line-height:1.9;"># Login
+curl -X POST /api/auth/login \
+  -d '{"email":"customer@demo.com","password":"demo1234"}'
+
+# Find nearby mechanics
+curl "/api/mechanics?lat=13.0827&amp;lng=80.2707"
+
+# Book a service
+curl -X POST /api/bookings \
+  -d '{"mechanic_id":1,"service_id":2,"address":"...","total_price":619}'</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">Slide 9/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 10: Data Model ===== -->
+  <section class="slide">
+    <div class="bg-accent2" style="bottom:-130px; left:-130px; width:340px; height:340px;"></div>
+    <div class="container-sl">
+      <h2>Data Model 🗄️</h2>
+      <p class="sub" style="margin-bottom: 26;">Secure SQLAlchemy schema — relationships shown below.</p>
+      <div class="grid2">
+        <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:start;">
+          <div class="card" style="min-width:180px; flex:1;">
+            <b style="color:var(--primary);">User</b>
+            <p style="margin-top:8; font-size:13.5; color:var(--muted);">id, name, email, phone, role, password_hash</p>
+            <p style="margin-top:8; font-size:13.5; color:var(--muted);">role ∈ {customer, mechanic}</p>
+          </div>
+          <div class="card card-accent" style="min-width:180px; flex:1;">
+            <b style="color:var(--violet);">MechanicProfile</b>
+            <p style="margin-top:8; font-size:13.5; color:var(--muted);">user_id, skills, experience, base_fee, verified, lat, lng</p>
+          </div>
+          <div class="card" style="min-width:180px; flex:1;">
+            <b style="color:var(--green);">Service</b>
+            <p style="margin-top:8; font-size:13.5; color:var(--muted);">name, description, base_price, estimated_time, icon</p>
+          </div>
+          <div class="card card-accent3" style="min-width:180px; flex:1;">
+            <b style="color:var(--amber);">Booking</b>
+            <p style="margin-top:8; font-size:13.5; color:var(--muted);">customer_id, mechanic_id, service_id, status, total_price, lat, lng</p>
+            <p style="margin-top:8; font-size:13.5; color:var(--muted);">status ∈ {PENDING, ACCEPTED, ON_THE_WAY, COMPLETED, CANCELLED}</p>
+          </div>
+          <div class="card" style="min-width:180px; flex:1;">
+            <b style="color:var(--red);">Review</b>
+            <p style="margin-top:8; font-size:13.5; color:var(--muted);">booking_id, customer_id, mechanic_id, rating, comment</p>
+            <p style="margin-top:8; font-size:13.5; color:var(--muted);">rating ∈ {1..5} ⭐</p>
+          </div>
+        </div>
+        <pre><code style="font-size:13px; line-height:1.8; max-height:440px; overflow:auto;">
+Relationship Map
+═══════════════════════════════════════════════
+
+User 1 ────┐
+  │        │ 1:1
+  └ MechanicProfile        ⭐ avg(rating)
+  │        ┌ 1:N ──┐
+  │        │       │
+  └ Bookings(booking.mechanic_id)
+              │
+              ├ Booking 1 ─── 1 Review
+              │   (status flow)
+              │
+              └─ Service (catalog)
+
+User (customer) 1 ── N Bookings (booking.customer_id)
+Booking ── 1 Review (rating + comment)
+Review feeds back into MechanicProfile.rating
+
+Status state-machine (enforced in PATCH):
+PENDING → ACCEPTED | CANCELLED
+ACCEPTED → ON_THE_WAY | CANCELLED
+ON_THE_WAY → COMPLETED</code></pre>
+      </div>
+    </div>
+    <div class="footer-bar">Slide 10/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 11: Future Scope ===== -->
+  <section class="slide">
+    <div class="bg-accent"></div>
+    <div class="container-sl">
+      <h2>Future Scope & Scalability 🌱</h2>
+      <p class="sub" style="margin-bottom: 26;">Long-term vision and social impact.</p>
+      <div class="grid3">
+        <div class="card" style="text-align:center;">
+          <div class="icon-box" style="background:#ede9fe; margin:0 auto;">⚡</div>
+          <h3>Multi-Service Scaling</h3>
+          <p>Beyond AC repair to electricians, plumbers & general home appliance technicians.</p>
+        </div>
+        <div class="card card-accent" style="text-align:center;">
+          <div class="icon-box" style="background:#dcfce7; margin:0 auto;">💳</div>
+          <h3>Digital Payments</h3>
+          <p>Secure UPI & digital wallet payment gateways for seamless checkout.</p>
+        </div>
+        <div class="card card-accent3" style="text-align:center;">
+          <div class="icon-box" style="background:#fef3c7; margin:0 auto;">🔔</div>
+          <h3>Maintenance Reminders</h3>
+          <p>Push notifications every 6 months for filter cleaning and gas check-ups.</p>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="icon-box" style="background:#fce7f3; margin:0 auto;">👥</div>
+          <h3>Social Impact</h3>
+          <p>Empowering local unorganized mechanics with digital visibility and steady income.</p>
+        </div>
+        <div class="card card-accent2" style="text-align:center;">
+          <div class="icon-box" style="background:#dbeafe; margin:0 auto;">🤖</div>
+          <h3>AI Smart Matching</h3>
+          <p>Skill-aware dispatch + predictive ETA for the nearest available technician.</p>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="icon-box" style="background:#f1f5f9; margin:0 auto;">📊</div>
+          <h3>Growth Targets</h3>
+          <p>1000+ mechanics · 5 cities · 10,000+ monthly bookings by Year 2.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">Slide 11/12</div>
+    <div class="pagination"></div>
+  </section>
+
+  <!-- ===== SLIDE 12: Final Outcome + CTA ===== -->
+  <section class="slide">
+    <div class="bg-accent2" style="bottom:-120px; left:-120px;"></div>
+    <div class="bg-accent" style="top:-120px; right:-120px;"></div>
+    <div class="container-sl" style="text-align:center; justify-content:center;">
+      <h2 style="font-size:40px;">A scalable service-matching platform<br/>built around trust and speed.</h2>
+      <div class="chip" style="margin: 24px auto; font-size:16px;">TRANSPARENT • VERIFIED • FAST • SCALABLE</div>
+      <div class="grid3" style="margin-top: 26;">
+        <div class="card">
+          <div class="stat-big" style="color:var(--primary);">🔗</div>
+          <h3 style="margin-top:10;">Direct connection</h3>
+          <p style="margin-top:8; font-size:14;">Customers ↔ Verified local mechanics</p>
+        </div>
+        <div class="card card-accent">
+          <div class="stat-big" style="color:var(--green);">💰</div>
+          <h3 style="margin-top:10;">Transparent pricing</h3>
+          <p style="margin-top:8; font-size:14;">Upfront rates • no hidden costs</p>
+        </div>
+        <div class="card card-accent3">
+          <div class="stat-big" style="color:var(--violet);">⚡</div>
+          <h3 style="margin-top:10;">Instant dispatch</h3>
+          <p style="margin-top:8; font-size:14;">Location-based • real-time tracking</p>
+        </div>
+      </div>
+      <div class="team" style="margin: 28px auto; max-width: 700px;">
+        <div class="team-img">👨‍💻</div>
+        <div style="text-align:left;">
+          <b>Team Head: T. Raja Kamala Kannan</b>
+          <div class="sub" style="color:var(--muted); font-size:13.5;">FALL INTO TECHVERSE • EduMentor AI • 2026</div>
+        </div>
+        <a href="https://github.com/new" class="cta-btn" style="margin-left:auto;">
+          🔗 Demo & Code on GitHub →
+        </a>
+      </div>
+    </div>
+    <div class="footer-bar">Slide 12/12 • THANK YOU</div>
+    <div class="pagination"></div>
+  </section>
+
+  <script>
+    const slides = document.querySelectorAll(".slide");
+    const dots = [];
+    const pagination = document.querySelector(".pagination");
+    let current = 0;
+
+    for (let i = 0; i < slides.length; i++) {
+      const dot = document.createElement("div");
+      dot.classList.add("dot");
+      if (i === 0) dot.classList.add("active");
+      dot.addEventListener("click", () => goTo(i));
+      dots.push(dot);
+      pagination.appendChild(dot);
+    }
+
+    function goTo(i) {
+      slides[current].classList.remove("active");
+      dots[current].classList.remove("active");
+      current = (i + slides.length) % slides.length;
+      slides[current].classList.add("active");
+      dots[current].classList.add("active");
+      updateFooter();
+    }
+
+    function updateFooter() {
+      const footers = document.querySelectorAll(".footer-bar");
+      footers.forEach((f, idx) => {
+        f.textContent = "Slide " + (idx + 1) + "/" + slides.length + (idx === slides.length - 1 ? " • THANK YOU" : "");
+      });
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") goTo(current + 1);
+      if (e.key === "ArrowLeft") goTo(current - 1);
+      if (e.key === "Home") goTo(0);
+      if (e.key === "End") goTo(slides.length - 1);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("slide")) goTo(current + 1);
+    });
+
+    updateFooter();
+
+    // Auto-advance every 20 seconds for a live demo loop
+    let auto = setInterval(() => goTo(current + 1), 20000);
+    document.addEventListener("mousemove", () => { clearInterval(auto); }, { once: true });
+  </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 450" role="img" aria-label="AC-Fix app screenshot">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0ea5e9"/><stop offset="1" stop-color="#0369a1"/></linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fbbf24"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
+    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#10b981"/><stop offset="1" stop-color="#059669"/></gradient></linearGradient>
+  </defs>
+  <!-- Phone frame -->
+  <rect x="160" y="10" width="580" height="430" rx="40" fill="#1e293b" stroke="none"/>
+  <rect x="168" y="18" width="564" height="414" rx="34" fill="url(#bgGrad)" stroke="none"/>
+  <!-- Browser chrome / status bar -->
+  <rect x="200" y="50" width="520" height="30" rx="8" fill="#f1f5f9" stroke="none"/>
+  <circle cx="218" cy="65" r="4" fill="#ef4444"/>
+  <circle cx="234" cy="65" r="4" fill="#f59e0b"/>
+  <circle cx="250" cy="65" r="4" fill="#10b981"/>
+  <text x="508" y="74" text-anchor="middle" font-family="system-ui" font-size="16" fill="#64748b">AC-Fix</text>
+  <!-- Navbar -->
+  <rect x="200" y="98" width="520" height="56" rx="12" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="226" cy="126" r="14" fill="url(#g1)" font-weight="700"/>
+  <text x="254" y="132" font-family="system-ui" font-weight="700" font-size="15" fill="#0f172a">AC-Fix</text>
+  <text x="254" y="150" font-family="system-ui" font-size="11" fill="#94a3b8">LOCAL SERVICE FINDER</text>
+  <text x="516" y="132" font-family="system-ui" font-weight="600" font-size="13" fill="#0ea5e9" text-anchor="middle">Find Mechanic</text>
+  <text x="600" y="132" font-family="system-ui" font-size="13" fill="#64748b">My Bookings</text>
+  <!-- Split: Map + list -->
+  <rect x="200" y="172" width="310" height="280" rx="14" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+  <!-- Map tiles placeholder -->
+  <rect x="216" y="188" width="278" height="238" rx="12" fill="#e0f2fe" stroke="none"/>
+  <circle cx="340" cy="300" r="24" fill="#0ea5e9"/>
+  <text x="340" y="310" font-family="system-ui" font-size="14" fill="#0369a1" text-anchor="middle">🗺</text>
+  <!-- Mechanic marker -->
+  <g transform="translate(280,260)">
+    <rect x="-8" y="-18" width="56" height="50" rx="25" fill="#fff" stroke="#0ea5e9" stroke-width="2"/>
+    <text x="14" y="8" font-family="system-ui" font-weight="700" font-size="11" fill="#0f172a">Ravi</text>
+    <text x="14" y="24" font-family="system-ui" font-size="10" fill="#475569">⭐ 5.0</text>
+    <rect x="-6" y="32" width="36" height="4" rx="2" fill="#0ea5e9"/>
+  </g>
+  <!-- List cards -->
+  <rect x="528" y="188" width="184" height="78" rx="12" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="560" cy="218" r="16" fill="url(#g1)"/>
+  <text x="588" y="224" font-family="system-ui" font-weight="700" font-size="14" fill="#0f172a">Ravi Kumar</text>
+  <text x="588" y="240" font-family="system-ui" font-size="10" fill="#94a3b8">T. Nagar, Chennai</text>
+  <circle cx="560" cy="258" r="3" fill="#fcd34d"/>
+  <circle cx="570" cy="258" r="3" fill="#fcd34d"/>
+  <circle cx="580" cy="258" r="3" fill="#fcd34d"/>
+  <circle cx="590" cy="258" r="3" fill="#f3f4f6"/>
+  <circle cx="600" cy="258" r="3" fill="#f3f4f6"/>
+  <text x="635" y="228" font-family="system-ui" font-weight="700" font-size="15" fill="#0369a1">₹150</text>
+  <text x="635" y="244" font-family="system-ui" font-size="10" fill="#94a3b8">visit charge</text>
+  <rect x="528" y="276" width="184" height="36" rx="10" fill="url(#g2)" stroke="none"/>
+  <text x="620" y="301" font-family="system-ui" font-weight="700" font-size="13" fill="#fff" text-anchor="middle">Book Now →</text>
+
+  <!-- Booking modal overlay -->
+  <rect x="230" y="370" width="300" height="160" rx="16" fill="#fff" stroke="#e2e8f0" stroke-width="1" transform="translate(0,0)"/>
+  <rect x="230" y="370" width="300" height="160" rx="16" fill="#fff" stroke="#e2e8f0" stroke-width="1" style="box-shadow:0 12px 30px rgba(0,0,0,.12)"/>
+  <text x="380" y="394" font-family="system-ui" font-weight="700" font-size="15" fill="#0f172a" text-anchor="middle">Book Ravi Kumar</text>
+  <text x="378" y="412" font-family="system-ui" font-size="12" fill="#94a3b8" text-anchor="middle">Choose Service · Pick Time · Confirm</text>
+  <rect x="260" y="425" width="80" height="26" rx="6" fill="#dbeafe" stroke="none"/>
+  <text x="300" y="444" font-family="system-ui" font-weight="700" font-size="11" fill="#0369a1" text-anchor="middle">🔧 Repair</text>
+  <rect x="260" y="459" width="80" height="26" rx="6" fill="#dbeafe" stroke="#0ea5e9" stroke-width="1"/>
+  <text x="300" y="478" font-family="system-ui" font-weight="700" font-size="11" fill="#0369a1" text-anchor="middle">🧼 Cleaning</text>
+  <text x="378" y="498" font-family="system-ui" font-weight="600" font-size="14" fill="#0f172a" text-anchor="middle">Total: ₹619</text>
+  <rect x="310" y="510" width="140" height="34" rx="12" fill="url(#g3)" stroke="none"/>
+  <text x="380" y="533" font-family="system-ui" font-weight="700" font-size="13" fill="#fff" text-anchor="middle">Confirm Booking</text>
+
+  <!-- Footer caption -->
+  <text x="30" y="472" font-family="system-ui" font-size="13" fill="#475569" transform="rotate(-20,30,472)">
+    AC-Fix • Live Geolocation • Real-time Reviews • Instant Dispatch
+  </text>
+</svg>

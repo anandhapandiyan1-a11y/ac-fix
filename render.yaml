@@ -1,0 +1,15 @@
+# One-click deploy to Render.com — full-stack (backend + frontend) in a single URL.
+# Link this repo to Render → it auto-builds & deploys with zero config.
+services:
+  - type: web
+    name: acfix
+    region: omaha
+    plan: free
+    env: python
+    # Build runs from repo root, producing frontend/dist + installing backend deps.
+    buildCommand: |
+      cd frontend && npm install --no-audit --no-fund && npm run build
+      cd ../backend && pip install --no-cache-dir -r requirements.txt
+    # Start the FastAPI server (which also serves the React build via main.py).
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /docs
